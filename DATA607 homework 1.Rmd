@@ -10,14 +10,15 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 1.Create a Github repository for DA607 homework.  
-2.In Rstudio, create a new project for DA607 homework.    
-3.Link Rstudio to Github repository for DA607.     
-4.Publish to Rpub.   
+2.In Rstudio, create a new project for DA607 homework.
+3.Link Rstudio to Github repository for DA607.
+4.Publish to Rpub
 
 here is the code
 
 ```r
-install.packages("tidyverse")
+
+install.packages(c("XML", "tidyverse"))
 library(stringr)
 
 #get table from UCI website

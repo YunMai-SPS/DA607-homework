@@ -1,0 +1,85 @@
+---
+title: "mushrooms_dataset"
+author: "Yun Mai"
+date: "February 8, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+1.Create a Github repository for DA607 homework.  
+2.In Rstudio, create a new project for DA607 homework.
+3.Link Rstudio to Github repository for DA607.
+4.Publish to Rpub
+
+here is the code
+
+```r
+
+install.packages(c("XML", "tidyverse"))
+library(stringr)
+
+#get table from UCI website
+url <- "https://archive.ics.uci.edu/ml/machine-learning-databases/mushroom/agaricus-lepiota.data"
+mushrooms_dataset <- read.table(url, header = FALSE, sep = ",")
+head(mushrooms_dataset)
+View(mushrooms_dataset)
+
+# select columns class, odor, spore-print-color,stalk-surface-below-ring, color-above-ring,habitate, cap-color, and population
+mushrooms_dataset <- mushrooms_dataset[c(1,5,20,13,14,22,3,21)]
+
+#rename the columns 
+names(mushrooms_dataset) <- c("class", "odor", "spore-print-color", "stalk-surface-below-ring", "stalk-color-above-ring", "habitate", "cap-color", "population")
+
+#view the table with new name for each column
+head(mushrooms_dataset)
+
+# rename the abbreviations in class
+recode_class <- function(x){switch(x,"p"="poisonous", "e"="edible")}
+mushrooms_dataset$class <- sapply(mushrooms_dataset$class, recode_class)
+head(mushrooms_dataset)
+
+# rename the abbreviations in odor
+recode_odor <- function(x){switch(x,"a"="almond", "l"="anise","c"="creosote","y"="fishy", "f"="foul","m"="musty", "n"="none","p"="pungent","s"="spicy")}
+mushrooms_dataset$odor <- sapply(mushrooms_dataset$odor, recode_odor)
+head(mushrooms_dataset)
+
+#rename the abbreviations in spore-print-color
+recode_sporeprintcolor <- function(x){switch(x,"k"="black","n"="brown","b"="buff", "h"="chocolate","r"="green", "o"="orange", "u"="purple", "w"="white","y"="yellow")}
+mushrooms_dataset$'spore-print-color' <- sapply(mushrooms_dataset$'spore-print-color', recode_sporeprintcolor)
+head(mushrooms_dataset)
+
+#rename the abbreviations in stalk-surface-below-ring
+recode_stalksurfacebelowring <- function(x){switch(x,'f'='fibrous','y'='scaly', 'k'='silky', 's'='smooth')}
+mushrooms_dataset$'stalk-surface-below-ring' <- sapply(mushrooms_dataset$'stalk-surface-below-ring', recode_stalksurfacebelowring)
+head(mushrooms_dataset)
+
+#rename the abbreviations in stalk-color-above-ring
+recode_stalkcolorabovering <- function(x){switch(x,'n'='brown','b'='buff','c'='cinnamon','g'='gray','o'='orange', 'p'='pink', 'e'='red', 'w'='white', 'y'='yellow')}
+mushrooms_dataset$'stalk-color-above-ring' <- sapply(mushrooms_dataset$'stalk-color-above-ring', recode_stalkcolorabovering)
+head(mushrooms_dataset)
+
+#rename the abbreviations in habitate
+recode_habitate <- function(x){switch(x,'g'='grasses', 'l'='leaves', 'm'='meadows', 'p'='paths', 'u'='urban', 'w'='waste', 'd'='woods')}
+mushrooms_dataset$'habitate' <- sapply(mushrooms_dataset$'habitate', recode_habitate)
+head(mushrooms_dataset)
+
+#rename the abbreviations in cap-color
+recode_capcolor <- function(x){switch(x,'n'='brown', 'b'='buff', 'c'='cinnamon', 'g'='gray', 'r'='green', 'p'='pink', 'u'='purple', 'e'='red', 'w'='white', 'y'='yellow')}
+mushrooms_dataset$'cap-color' <- sapply(mushrooms_dataset$'cap-color', recode_capcolor)
+head(mushrooms_dataset)
+
+#rename the abbreviations in population
+recode_population <- function(x){switch(x,'a'='abundant','c'='clustered', 'n'='numerous', 's'='scattered', 'v'='several', 'y'='solitary')}
+mushrooms_dataset$'population' <- sapply(mushrooms_dataset$'population', recode_population)
+head(mushrooms_dataset)
+```
+
+
+
+
+
+
+

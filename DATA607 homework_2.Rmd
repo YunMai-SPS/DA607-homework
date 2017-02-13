@@ -1,0 +1,97 @@
+---
+title: "Movies Rating"
+author: "Yun Mai"
+date: "February 12, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Choose six recent popular movies.  Ask at least five people that you know (friends, family, classmates, imaginary friends) to rate each of these movie that they have seen on a scale of 1 to 5.  Take the results (observations) and store them in a SQL database.  Load the information into an R dataframe.
+
+
+here is the code
+```r
+install.packages(c("stringr", "XML", "maps", "RCurl","RMySQL"))
+install.packages('knitr',dependencies=TRUE,repos="http://cran.rstudio.com/")
+
+# load pacakages need to be used
+library(stringr)
+library(XML)
+library(maps)
+library(RCurl)
+library(RMySQL)
+library(knitr)
+
+# get movie data from IMDb website
+movie <- htmlParse("http://www.imdb.com/chart/moviemeter/?ref_=nv_mv_mpm_7",encoding = "UTF-8")
+tables <- readHTMLTable(movie, stringsAsFactors = FALSE)
+head(tables)
+View(tables)
+
+# what type of data structures? 
+class(tables)
+length(tables)
+tables[1]
+tables[2]
+
+# cleaning the data
+tables[2] <- NULL
+View(tables)
+class(tables[1])
+length(tables)
+class(tables[[1]])
+View (tables[[1]])
+length(tables[[1]])
+movie_df <- data.frame (tables[[1]])
+class(movie_df)
+View(movie_df)
+colnames(movie_df)[1] <- "YearRelease"
+colnames(movie_df)[2] <- "Title"
+colnames(movie_df_new)[4] <- "MovieID"
+movie_df[5] <- NULL
+
+# get first 6 rows and organize
+movie_df_new <- movie_df[1:6,]
+movie_df_new[4] <- c(1, 2, 3, 4, 5, 6)
+View(movie_df_new)
+movie_df_new[2] <- c('Split', 'La La Land', 'Beauty and the Beast', 'Arrival', 'Resident Evil: The Final Chapter', 'xXx: Return of Xander Cage')
+movie_df_new[1] <- c(2016, 2016, 2017, 2016, 2016, 2017)
+
+# create pretended friends table
+x <- 1:5
+y <- c('Ming', 'Hao', 'Alison', 'Eran', 'Orshi')
+Friends <- data.frame(FriendsID=x,FriendsName=y)
+Friends
+
+# generate a series of pretended rating from my friends
+A <- sample (1:5, replace=T, 30)
+M <- data.frame(movie_df_new[4])
+a <- c(rep(1, nrow(M)),rep(2,nrow(M)),rep(3,nrow(M)),rep(4,nrow(M)),rep(5,nrow(M)))
+a
+M.ID <- rep(1:6,5)
+Rating <- data.frame(MovieID=M.ID, FriendID=a, FriendRating=A)
+
+# connect to MySQL database
+mydb = dbConnect(MySQL(), user='root', password='5201', dbname='movie_rating', host='localhost')
+
+# listing talbles and fields
+dbListTables(mydb)
+dbListFields(mydb, 'movie')
+
+#making tables
+dbWriteTable(mydb, name='movie_rating', value=movie_df_new, overwrite=TRUE, append=FALSE)
+dbWriteTable(mydb, name='movie_raw', value=movie_df, overwrite=TRUE, append=FALSE)
+
+#running queries 
+rs = dbSendQuery(mydb, "select * from movie_raw")
+
+#retrieving data from MySQL
+data = fetch(rs, n=-1)
+View(data)
+```
+
+
+

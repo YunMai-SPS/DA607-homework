@@ -1,0 +1,89 @@
+---
+title: "DA607Homework3_regex_prblm-4"
+author: "Yun Mai"
+date: "February 19, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Automated Data Collection - Chaper 3
+
+Problems
+4.Describe the types of strings that conform to the following regular expressions and
+construct an example that is matched by the regular expression.
+(a) [0-9]+\\$
+(b) \\b[a-z]{1,4}\\b
+(c) .*?\\.txt$
+(d) \\d{2}/\\d{2}/\\d{4}
+(e) <(.+?)>.+?</\\1>
+
+here is the code
+```r
+library(stringr)
+library(xtable)
+library(knitr)
+
+# (a) [0-9]+\\$
+# [0-9]+\\$ represents digits followed by character $
+# example matched by the regular expression [0-9]+\\$
+cool <- c(rnorm(10, mean = 20, sd = 2))
+cool_char <- as.character(cool)
+cool_var <- paste(cool_char[c(2,4,6,8,10)],"$", sep="")
+x <- c("$12345678912$34$", "234$", "6$8", "$0058","0058$")
+cool_com <- c(cool_char[1:3],cool_var[1],c(cool_char[4:6],cool_var[2]),c(cool_char[7:9],cool_var[3]),c(cool_char[10:12],cool_var[4:5]),x)
+cool_ext <- unlist(str_extract_all(cool_com, "[0-9]+\\$"))
+
+# (b) \\b[a-z]{1,4}\\b
+# \\b[a-z]{1,4}\\b represents word less than 4 lower case letters
+# example matched by the regular expression \\b[a-z]{1,4}\\b
+
+set.seed(1)
+words1 <- stringi::stri_rand_strings(5, 3, pattern="[a-z]")
+set.seed(2)
+words2 <- stringi::stri_rand_strings(5, 3, pattern="[a-zA-Z0-9]")
+set.seed(3)
+words3 <- stringi::stri_rand_strings(5, 5,pattern="[a-z]")
+set.seed(4)
+words4 <- stringi::stri_rand_strings(5, 5,pattern="[a-zA-Z0-9]")
+set.seed(5)
+words5 <- stringi::stri_rand_strings(5, 7,pattern="[a-z]")
+set.seed(6)
+words6 <- stringi::stri_rand_strings(5, 7,pattern="[a-zA-Z0-9]")
+word_com <- c(words1, words2, words3,words4, words5, words6)
+words_lessthan4 <- grepl ("\\b[a-z]{1,4}\\b",word_com)
+
+# (c) .*?\\.txt$
+# (c) .*?\\.txt$ represents any characters followed by .txtat the end"
+# example matched by the regular expression .*?\\.txt$
+txt <-c("txt.notfun","do.txt", "some.txt", "fun.txt","exp.txt")
+mosaic <- c(txt,word_com,txt)
+txttest <- grepl (".*?\\.txt$",mosaic)
+txttest_value <- unlist(str_extract_all(mosaic,".*?\\.txt$"))
+
+# (d) \\d{2}/\\d{2}/\\d{4}
+# \\d{2}/\\d{2}/\\d{4} represents 2 digits forward slash 2 digits forward slash 4 digits
+# example matched by the regular expression \\d{2}/\\d{2}/\\d{4}
+
+eg1 <- sample(10000000:10000100,10,replace=T) 
+eg2 <- sample(100000000:100000100,10,replace=T)
+eg <- c(eg1,eg2)
+a <- 3
+b <- 6
+eg3 <- paste(substr(eg, 1, a-1), "/", substr(eg, a, nchar(eg)), sep = "")
+eg4 <- paste(substr(eg3, 1, b-1), "/", substr(eg3, b, nchar(eg3)), sep = "")
+eg5 <- paste(substr(eg3, 1, a+1), "/", substr(eg3, a+2, nchar(eg)), sep = "")
+eg_com <- c(eg4,eg5, "12/34/0","5678/34/12","12/34/567890")
+patterntest <- grepl("\\d{2}/\\d{2}/\\d{4}", eg_5_com)
+patterntest_value <- unlist(str_extract_all(eg_com,"\\d{2}/\\d{2}/\\d{4}"))
+
+# (e) <(.+?)>.+?</\\1>
+# <(.+?)>.+?</\\1> represents any characters between <> followed by any characters followed by < and one forward slash, then the pattern what ever comes in previous (.+?)in between < and > will be check the further match one more time
+# 
+scramble <- c( "<1180abc>0</1180abc>","<01234lastone></\\1>","<24005yu45ABC>AND</\\1>","<A happy face> is </A happy face>")
+test <- grepl ("<(.+?)>.+?</\\1>", scramble)
+test_value <- unlist(str_extract_all(scramble,"<(.+?)>.+?</\\1>"))
+
+```
+

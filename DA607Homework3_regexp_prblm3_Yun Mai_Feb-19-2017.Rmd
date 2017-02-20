@@ -1,0 +1,85 @@
+---
+title: "DA607Homework3_regex_prblm-3"
+author: "Yun Mai"
+date: "February 19, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Automated Data Collection - Chaper 3
+
+Problems
+3.Copy the introductory example. The vector name stores the extracted names.
+
+R> name
+[1] "Moe Szyslak" "Burns, C. Montgomery" "Rev. Timothy Lovejoy"
+[4] "Ned Flanders" "Simpson, Homer" "Dr. Julius Hibbert"
+
+(a) Use the tools of this chapter to rearrange the vector so that all elements conform to the standard first_name last_name.
+(b) Construct a logical vector indicating whether a character has a title (i.e., Rev. and Dr.).
+(c) Construct a logical vector indicating whether a character has a second name.
+
+here is the code
+```r
+install.packages("bitops")
+install.packages("RCurl")
+library(RCurl)
+library(stringr)
+library(xtable)
+library(knitr)
+
+raw.data <- "555-1239Moe Szyslak(636) 555-0113Burns, C. Montgomery555-6542Rev. Timothy Lovejoy555 8904Ned Flanders636-555-3226Simpson, Homer5553642Dr. Julius Hibbert"
+ 
+name <- unlist(str_extract_all(raw.data, "[[:alpha:]., ]{2,}"))
+
+#generate a vector so that all elements conform to the standard first_name last_name
+
+midlastname <- unlist(str_extract_all(name, " [\\.[:alpha:]  ]{3,}"))
+lastname <- str_extract(midlastname,"\\w+$")
+firstname_messy <- unlist(str_extract_all(name, "[[:alpha:] ,]{3,} "))
+firstname <- unlist(str_extract_all(firstname_messy, "^?\\w+"))
+
+name_in_right_format <- str_c(firstname, lastname,sep=" ")
+name_in_right_format.df <- data.frame(first_name=firstname,last_name=lastname) 
+
+#generate table
+print(xtable(name_in_right_format.df),comment=F)
+
+# or generate better looking table with kable 
+kable(name_in_right_format.df)
+results = "asis"
+
+# creat a logic vactor to indicate whether a character has a title
+
+title_firstname <- unlist(str_extract_all(name, "[[:alpha:] .,]{2,} "))
+trimed_titile_firstname <- str_trim(title_firstname)
+titile_firstname_var <- str_replace(trimed_titile_firstname, pattern="[.]$", replacement=",")
+istitle1 <- grepl("\\.", titile_firstname_var)
+istitle2 <- grepl("[[:alpha:]]{4,}",titile_firstname_var)
+istitle <- istitle1 & istitle2 
+print(istitle)
+x <- c(1,2,3,4,5,6)
+hastitile.df <- data.frame(x,istitle)
+hastitile.df <- data.frame(people=x,has_title=istitle)
+
+#generate table
+print(xtable(hastitile.df),comment=F)
+
+# or generate better looking table with kable 
+kable(hastitile.df)
+
+#Construct a logical vector indicating whether a character has a second name
+secondname <- grepl("\\.",midlastname)
+secondname.df <- data.frame(x,secondname)
+secondname.df <- data.frame(people=x,has_secondname=secondname)
+
+
+#generate table
+print(xtable(secondname.df ),comment=F)
+
+# or generate better looking table with kable 
+kable(secondname.df )
+```

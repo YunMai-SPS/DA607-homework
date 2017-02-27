@@ -1,0 +1,220 @@
+---
+title: "DA607_Project1_Chess_Tournament"
+author: "Yun Mai"
+date: "February 26, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Project 1
+
+In this project, you’re given a text file with chess tournament results where the information has some structure. Your job is to create an R Markdown file that generates a .CSV file (that could for example be imported into a SQL database) with the following information for all of the players:
+
+Player’s Name, Player’s State, Total Number of Points, Player’s Pre-Rating, and Average Pre Chess Rating of Opponents
+
+For the first player, the information would be:
+Gary Hua, ON, 6.0, 1794, 1605
+1605 was calculated by using the pre-tournament opponents’ ratings of 1436, 1563, 1600, 1610, 1649, 1663, 1716, and dividing by the total number of games played.
+
+The chess rating system (invented by a Minnesota statistician named Arpad Elo) has been used in many other contexts, including assessing relative strength of employment candidates by human resource departments.
+
+```{r chess tournament}
+# load pacakages need to be used
+library(stringr)
+library(XML)
+library(maps)
+library(RCurl)
+library(RMySQL)
+library(knitr)
+library(ggplot2)
+```
+
+# Load the chess tournamentinfo table
+```{r}
+tournamentinfo <- read.table("https://raw.githubusercontent.com/YunMai-SPS/DA607-homework/master/tournamentinfo.txt",header = FALSE, sep="\t",quote = "",stringsAsFactors = FALSE)
+View(tournamentinfo)
+```
+
+remove "---"lines
+```{r}
+chess1 <- data.frame(tournamentinfo[!str_detect(tournamentinfo[,1],"(--+)"),])
+head(chess1)
+```
+
+# Merge info of each case to the same row and convert the .txt file to a table
+```{r}
+x <- seq(3,length(chess1[,1]),2)
+y <- seq(4,length(chess1[,1]),2)
+
+chess2 <- str_c(chess1[x,],chess1[y,],sep="")
+
+chess2_text <- textConnection(chess2)
+chess3 <- read.table(chess2_text,sep="|",stringsAsFactors = FALSE)
+```
+
+# Name the columns in the table
+```{r}
+chess4 <- str_c(chess1[1,],chess1[2,])
+chess4_text <- textConnection(chess4)
+chess5 <- read.table(chess4_text,sep="|",stringsAsFactors = FALSE)
+colnames_change <- c(4:10,14:20)
+chess5[colnames_change] <- str_c(chess5[,seq(4, 10, 1)],chess5[,seq(14, 20, 1)], sep=" ")
+
+colnames_change2 <- c(1,3,11)
+chess5[colnames_change2] <- c(str_c(chess5[,1],chess5[,11], sep=" "),str_c(chess5[,3],chess5[,13], sep=" "),"state")
+chess5[,13] <- chess5[,3]
+
+headoftable <- as.character(chess5[1,])
+colnames(chess3) <- headoftable
+```
+
+# Extract pre-/post-rating values and UCSFID and create new columns
+```{r}
+a <- str_extract(chess3[,12],"(: +)[0-9]{1,}")
+pre_rating <- str_replace_all(a,": ","")
+pre_rating_num <- as.numeric(pre_rating)
+chess3[,21] <- pre_rating_num 
+colnames(chess3)[colnames(chess3)=="NA"] <- "pre-rating"
+
+b <- str_extract(chess3[,12],"(->|-> )[0-9]{1,}")
+post_rating <- str_replace_all(b,"->|-> ","")
+post_rating_num <- as.numeric(post_rating)
+chess <- cbind(chess3,post_rating_num)
+colnames(chess)[colnames(chess)=="post_rating_num"] <- "post-rating"
+
+c <- str_extract(chess3[,12],"[0-9]{1,}")
+UCSF_ID <- as.numeric(c)
+chess <- cbind(chess,UCSF_ID)
+colnames(chess)[colnames(chess)=="UCSF_ID"] <- "UCSF_ID"
+head(chess)
+```
+
+# Calculate the average pre-rating of each player's opponents
+In this project, we will need to study the relationship between the points one player earned and the average pre-rating of opponents one player played. The pre-rating of each player's opponents will need to be calcualted. As such, opponents's number will only show in the game wined(W), lost(L), and Draw(D). 
+```{r}
+for(i in 1:nrow(chess)){
+  sum_opp <- 0
+  count <- 0
+  for(j in c(4:10)){
+    d <- str_detect(chess[i,j],"[WLD]{1}[[:space:]]+[[:digit:]]+")
+    e <- grep("[WLD]{1}[[:space:]]+[[:digit:]]+",chess[i,j],value = TRUE)
+    opp <- as.numeric(str_extract(e,"[[:digit:]]+"))
+    if (d == TRUE){
+       count <- count + 1
+       sum_opp <- sum_opp + chess[opp,"pre-rating"]
+    }
+  }
+  chess[i,24] <- round(sum_opp/count,0)
+}
+colnames(chess)[24] <- "ave-opp-pre-rating"
+colnames(chess)[13:20] <- names(chess[3:10])
+```
+
+# Subset the table to show desire variables
+```{r}
+name_trim <- str_trim(names(chess))
+name_neat <- str_replace(name_trim, "[[:space:]]{2,4}"," ")
+colnames(chess) <- name_neat
+names(chess)
+chess_sub1 <- chess[,c("Pair Num", "Player Name", "UCSF_ID", "state", "Total Pts", "pre-rating", "ave-opp-pre-rating", "post-rating")]
+chess_sub2 <- chess[,c("Player Name","state", "Total Pts", "pre-rating", "ave-opp-pre-rating")]
+```
+
+# Export as .CSV file
+```{r}
+# Set the working directory
+setwd("D:/Program Files/RStudio/DA607_homework/DA607_Project1")
+write.csv(chess_sub2, file = "Chess_tournament_Project_Yun.csv", quote = FALSE)
+
+```
+
+# Display the table
+```{r kable, results = 'asis', echo = FALSE}
+kable(chess_sub2, format = "markdown",align = c(rep("l",2), rep("r",3)))
+```
+
+# Analyze the relationship between points and difference in players' rating
+
+With the table that could be easily read in R, statistic analysis could be done conveniently. 
+
+**1. Distribution of different variables**
+```{r}
+library(tidyverse)
+dif_rating <- chess_sub2[,"ave-opp-pre-rating"]-chess_sub2[,"pre-rating"]
+chess_sub3 <- cbind(chess_sub1,dif_rating)
+# statistic analysis 
+summary(chess_sub3[,c('Total Pts', 'pre-rating', 'post-rating', 'ave-opp-pre-rating', 'dif_rating')])
+
+```
+```{r}
+ggplot(data = chess_sub3,aes(x = pre_rating_num)) + 
+  geom_histogram(mapping = aes(y=..density..), binwidth = 50, color="black", fill="grey") + geom_density(aes(x = pre_rating_num),alpha =0.2, color="blue", fill = "blue") + labs(title = "Distribution of Players' Pre-performance Rating", x = "Player's Pre-rating")
+
+```
+
+```{r}
+boxplot(chess_sub3[,"pre-rating"], ylab = "Player's Pre-rating")
+```
+
+The distribution of the Players' pre-performance rating skews to the low end with median close to 1400. One player with very low rating could be considered as outlier.  
+
+```{r}
+ggplot(data = chess_sub3,aes(x = post_rating_num)) + 
+  geom_histogram(mapping = aes(y=..density..), binwidth = 50, color="black", fill="grey") + geom_density(aes(x = post_rating_num),alpha =0.2, color="green", fill = "green") + labs(title = "Distribution of Players' Post-performance Rating", x = "Player's Post-rating")
+```
+
+The distribution of players' post-performance rating is multimodal.
+
+```{r}
+Pts <- chess_sub3[,"Total Pts"]
+ggplot(data = chess_sub3,aes(x = Pts)) + 
+  geom_histogram(mapping = aes(y=..density..), binwidth = 0.5, color="black", fill="grey") + geom_density(aes(x = Pts),alpha =0.2, color="purple", fill = "purple") + labs(title = "Distribution of Players' Total Points", x = "Players' Total Points")
+```
+
+The distribution of players' total points is normal distribution.
+
+**2.The relationship between difference in rating and score/post-rating**
+```{r}
+ggplot(data = chess_sub3,aes(x = dif_rating)) + 
+  geom_histogram(mapping = aes(y=..density..), binwidth = 50, color="black", fill="grey") + geom_density(aes(x = dif_rating),alpha =0.2, color="red", fill = "red") + labs(title = "Distribution of Difference in Rating", x = "Average of Opponents' Pre-rating - Player's Pre-rating")
+
+```
+
+```{r}
+boxplot(chess_sub3[,"dif_rating"], ylab = "Average of Opponents' Pre-rating - Player's Pre-rating")
+```
+
+The distribution of the difference of pre-performance rating between the players and their opponents skews to the right. The median is 0, meaning basically palyers play against the opponents with similar rating. The distribution of the difference of players's rating is close to normal distribution if we do not consider a few of the players whose opponents are much stronger than themselves. 
+
+```{r}
+challenging_0 <- "neg"
+for(i in 2:nrow(chess_sub3)){
+  if(chess_sub3[i,"pre-rating"] < chess_sub3[i,"ave-opp-pre-rating"]) {
+  challenging_2 <- "pos"
+ }else if(chess_sub3[i,"pre-rating"] > chess_sub3[i,"ave-opp-pre-rating"])
+ {
+   challenging_2 <- "neg"
+ }else
+ {
+   challenging_2 <- "equal"
+ }
+  challenging_0 <- rbind(challenging_0,challenging_2)
+}
+
+chess_sub4 <- cbind(chess_sub3, challenging_0)
+
+ggplot(data = chess_sub4, aes (x = dif_rating, y = Pts, group = challenging_0)) + geom_point(mapping = aes(color = challenging_0)) + geom_smooth(mapping = aes(x = dif_rating, y = Pts, group = challenging_0)) + labs(title = "Total Points Vs. Diffrence in Players' Rating",x = "Average of Opponents' Pre-rating - Player's Pre-rating", y = "Total Points")
+```
+
+The line shows the correlation between the total points and the difference in players' pre-rating. When the difference in rating is positive, i.e., the player played against advanced players, it is likely that they earned less points than those whose opponents rated lower. On the contrary, the player played against the weaker players tended to get more points.
+
+```{r}
+dif_post_pre <- chess_sub3[,"post-rating"] - chess_sub3[,"pre-rating"]
+ggplot(data = chess_sub4, aes (x = dif_rating, y = dif_post_pre, group = challenging_0)) + geom_point(mapping = aes(color = challenging_0)) + geom_smooth(mapping = aes(group = challenging_0)) + labs(title = "Post-rating Vs. Diffrence in Players' Rating", x = "Average of Opponents' Pre-rating - Player's Pre-rating", y = "Post-performance Rating - Pre-performance Rating")
+```
+
+The line shows the correlation between the changes of rating and the difference in players' pre-performance rating. When the difference in pre-rating is positive, i.e., the player played against advanced players, it is likely that his/her rating increased faster. On the other hand, the player played against the weaker players tended to remain the same ranking or even slightly decreased.
+

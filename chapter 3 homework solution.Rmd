@@ -1,0 +1,102 @@
+---
+title: "DATA606 chapter3 homework 3-2 3-18"
+author: "Yun Mai"
+date: "February 20, 2017"
+output: github_document
+  html_document: 
+    fig_caption: yes
+    keep_md: yes
+    toc: yes
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##  Chapter 3 - Distributions of Random Variables
+load the packages
+```{r normal distribution}
+library(DATA606) 
+library(ggplot2)
+```
+
+#3.6.1 Normal distribution
+3.2 Area under the curve, Part II. What percent of a standard normal distribution N(?? = 0, ??= 1) is found in each region? Be sure to draw a graph.
+(a) Z > -1.13 (b) Z < 0.18 (c) Z > 8 (d) |Z| < 0.5
+
+plots and solutions
+```{r}
+normalPlot(mean = 0,sd = 1,bounds=(c(-1.13,Inf)),tails = FALSE)
+```
+
+when Z> -1.13, P =87.1%
+
+```{r}
+normalPlot(mean = 0,sd = 1,bounds=(c(-Inf,0.18)),tails = FALSE)
+```
+
+when Z< 0.18, P = 57.1%;
+
+```{r}
+normalPlot(mean = 0, sd = 1,bounds=(c(8,Inf)),tails = FALSE)
+```
+
+when Z> 8, P =6.66e-16;
+
+```{r}
+normalPlot(mean = 0,sd = 1,bounds=(c(-Inf,0.5)),tails = FALSE)
+```
+
+when Z< 0.5, P =69.1%.
+
+# 3.6.2 Evaluating the normal approximation
+3.18 Heights of female college students. Below are heights of 25 female college students.
+1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 
+54 55 56 56 57 58 58 59 60 60 60 61 61 62 62 63 63 63 64 
+
+20 21 22 23 24 25
+65 65 67 67 69 73
+
+(a) The mean height is 61.52 inches with a standard deviation of 4.58 inches. Use this information to determine if the heights approximately follow the 68-95-99.7% Rule. 
+
+```{r}
+pnorm(61.52+4.58,mean=61.52,sd=4.58)
+```
+Probability for falling within 1 standard deviation of the mean is 84.13% but not close to 68%.
+
+```{r}
+pnorm(61.52+2*4.58,mean=61.52,sd=4.58)
+```
+Probability for falling within 1 standard deviation of the mean is 97.72% but not 95%.
+
+
+```{r}
+pnorm(61.52+3*4.58,mean=61.52,sd=4.58)
+```
+Probability for falling within 1 standard deviation of the mean is close to 99.7%.
+
+So the distribution of the heights does not approximately follow the 68-95-99.7% Rule.
+
+(b) Do these data appear to follow a normal distribution? Explain your reasoning using the graphs provided below.
+
+```{r}
+height <- c(54, 55, 56, 56, 57, 58, 58, 59, 60, 60, 60, 61, 61, 62, 62, 63, 63, 63, 64, 65, 65, 67, 67, 69, 73)
+hist(height, prob=TRUE, xlab="height")
+curve(dnorm(x, 61.52, 4.58),min(height), max(height), add=T, col="darkblue")
+```
+
+Based on the histogram, the distribution seems to be slightly skewed to the right.
+
+```{r}
+qqnorm(height)
+qqline(height)
+```
+
+The QQ-plot of the data shows that points tend to follow the line but with some deviation on both high and low ends. To see whether the Q-Q plot looks like that for data from a known normal distribution, a set simulated data and their Q-Q plots were generated as shown below: 
+
+```{r}
+qqnormsim(height)
+```
+
+By comparing the data plot with sample plots, we can see that Q-Q plot for the data is similar to that for the simulated data sets. Thus I conclude that the female students' height data follows a normal distribution.

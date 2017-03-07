@@ -104,8 +104,27 @@ It is easy to conclude from the stacked bar graph that:
 2) Phoenix contributes the most to the flights of AM WEST Airline but the least to the flights of ALASKA Airline.
 
 ```{r}
+# calculate the delay rate and on-time rate in all flights of ALASKA
+airdelay_tidy2_1 <- airdelay_tidy1 %>% 
+  filter(Airline %in% "ALASKA") %>% 
+  mutate(All_Flight = sum(Total), Delayed_to_all = delayed/All_Flight ,Ontime_to_all = on_time/All_Flight)
+
+# calculate the delay rate and on-time rate in all flights of AM WEST
+airdelay_tidy2_2 <-airdelay_tidy1 %>% 
+  filter(Airline %in% "AM WEST") %>% 
+  mutate(All_Flight = sum(Total), Delayed_to_all = delayed/All_Flight ,Ontime_to_all = on_time/All_Flight) 
+
+# join two mutated datasets
+airdelay_tidy2 <- bind_rows(airdelay_tidy2_1, airdelay_tidy2_2)
+
+kable(airdelay_tidy2)
+
+
+```
+
+```{r}
 # plot arrival delay rate for the two Airlines accross five destinations with stacked bar graph
-ggplot(airdelay_tidy1, aes(x = Airline, y = Proportion_delayed, fill = Destination)) + 
+ggplot(airdelay_tidy2, aes(x = Airline, y = Delayed_to_all, fill = Destination)) + 
   geom_bar(stat="identity", position = "fill") + 
   labs(y = "Arrivial Delay Rate") +
   scale_fill_brewer(palette = "Paired") 
@@ -118,17 +137,17 @@ According to Figure 3, the Flights to San Francisco and Seattle accounts for 75%
 
 ```{r}
 # make groupies observations and change the units of analysis
-airdelay_tidy2 <- airdelay_tidy1 %>%
+airdelay_tidy3 <- airdelay_tidy1 %>%
   group_by(Airline) %>%
   summarise(delayed = sum(delayed), on_time = sum(on_time), Total = sum(Total)) %>%
   gather("Performance","Number",2:4)
-kable(airdelay_tidy2)
+kable(airdelay_tidy3)
 ```
 
 
 ```{r}
 # plot the total counts of flights arrived on time or delayed for the twe Airlines
-ggplot(airdelay_tidy2, aes(x = Airline, y = Number, fill = Performance)) + 
+ggplot(airdelay_tidy3, aes(x = Airline, y = Number, fill = Performance)) + 
   geom_bar(stat="identity", position = "dodge") + 
   labs(y = "Flight Count") +
   scale_fill_brewer(palette = "Set1") 
@@ -139,15 +158,15 @@ ggplot(airdelay_tidy2, aes(x = Airline, y = Number, fill = Performance)) +
 AM WEST Airline flies more than ALASKA Airline and AM WEST Airline has higher counts of flights on either arrived on time or delayed.
 
 ```{r}
-airdelay_tidy3 <- airdelay_tidy1 %>%
+airdelay_tidy4 <- airdelay_tidy1 %>%
   group_by(Airline) %>%
   gather("Number_category","Number", 3:5) 
 airdelay_tidy3[,3:4] <- NULL
-kable(airdelay_tidy3)
+kable(airdelay_tidy4)
 ```
 
 ```{r}
-ggplot(airdelay_tidy3, aes(x = factor(Number_category), y = Number, fill = Airline )) +
+ggplot(airdelay_tidy4, aes(x = factor(Number_category), y = Number, fill = Airline )) +
   geom_boxplot() + 
   labs(x = "Performance", y = "Filght Count") +
   theme(axis.text.x = element_text(vjust = 1, hjust = 0.5)) +

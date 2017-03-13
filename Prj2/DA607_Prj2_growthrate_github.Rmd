@@ -1,0 +1,162 @@
+---
+title: "Yeast Growth and Nutrition"
+author: "Yun Mai"
+date: "March 10, 2017"
+output: github_document
+        
+---
+
+Show source code in the knitted document
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Load packages
+```{r growthrate}
+library(RCurl)  
+library(tidyr)
+library(dplyr)  
+library(knitr)
+library(ggplot2)
+library(stringr)
+library(markdown)
+
+```
+# The correlation between growth rate and cell cycle, stress response, and metabolic activity in yeast.
+The changes of gene expressions were measured on RNA level when restricting certain nutrients. Analyzing the gene expression pattern will help to find out how cells respond to the starving and how cells switch gene exprssion program under the restriction of different nutrients.
+
+# Import the data
+```{r}
+url <- "https://raw.githubusercontent.com/YunMai-SPS/DA607-homework/master/Prj2_Brauer2008_DataSet1.tds"
+yeast <- read.delim(url, header = T, fill = T)
+head(yeast)
+```
+
+# Tidying the data to the fomat suit to further analysis 
+
+1. There are mutiple variables stored in one column. Separate that column into many columns each containing only one variables.
+
+2. The coulumn "Name"" contains: 
+1) Gene name
+2) According to the paper, Sets of genes were assigned biological process, molecular function, and cellular components based on the categories of annotations from the Gene Ontology (GO) (Ashburner M., et al. (2000) Gene ontology: tool for the unification of biology. The Gene Ontology Consortium. Nat. Genet 25:25-29.). Gene name followed by the decriptions of biological process and molecular function.
+3) Locus tag (according to the gene report in NCBI)
+4) Position
+
+```{r}
+yeast1 <- yeast %>%
+  separate(NAME,c("Name","Biological_Process","Molecular_Function","Locus_tag","Position"),sep = "\\|+") 
+```
+
+2. There are more than one observations in one row.  G, N, S, P, U, L are the restricted nutrients which represents glucose, ammonium, sulfate, phosphate, uracil or leucine. The number after these nutrients are dilution rates (and therefore the culture's average exponential growth rate, mu) which range from 0.05 per hour (corresponding to a cell doubling time of about 14 h) to more than 0.3 per hour (doubling time of about 2 h).Each column from G0.05 to the end records the observations for one sample, with two variables in each column header. First I will use gather function to turn the header varriables into a column paried with the coppresponding gene expression values by collaping columns from G0.05 to the end into key-value pairs.
+
+```{r}
+yeast2 <- gather(yeast1, Sample, Expression, G0.05:ncol(yeast1))
+```
+
+3. There are two variables in column Sample - nutrients and growth rate. Separate this column into two columns.
+
+```{r}
+yeast3 <- yeast2 %>%
+  separate(Sample, c("Nutrients","Growth_Rate"), sep=1, convert = T)
+head(yeast3)
+```
+
+4. Replace nutients abbrev to full name since it is more clear to show full name in the figure legends.
+```{r}
+yeast3$Nutrients[yeast3$Nutrients == "G"] <- "Glucose"
+yeast3$Nutrients[yeast3$Nutrients == "N"] <- "Ammonium"
+yeast3$Nutrients[yeast3$Nutrients == "S"] <- "Sulfate"
+yeast3$Nutrients[yeast3$Nutrients == "P"] <- "Phospahte"
+yeast3$Nutrients[yeast3$Nutrients == "U"] <- "Uracil"
+yeast3$Nutrients[yeast3$Nutrients == "L"] <- "Leucine"
+str(yeast3)
+```
+
+# Analyze and plot the data
+1. Filter genes related to cell cycle and take a look at the relation between growth rate and cell-cycle-related gene expression patterns.
+```{r}
+yeast3$Name <- str_trim(yeast3$Name)
+yeast3$Biological_Process <- str_trim(yeast3$Biological_Process)
+yeast3$Molecular_Function <- str_trim(yeast3$Molecular_Function)
+yeast3$Locus_tag <- str_trim(yeast3$Locus_tag)
+yeast3$Position <- str_trim(yeast3$Position)
+
+yeast3$GID <- as.vector(yeast3$GID)
+yeast3$YORF <- as.vector(yeast3$YORF)
+
+Bio_Pro <- as.factor(yeast3$Biological_Process)
+sort(levels(Bio_Pro))
+
+# filter genes related to cell cycle
+yeast_sub2 <- yeast3 %>% 
+  filter(Biological_Process %in% "cell cycle") 
+
+Exp <- as.factor(yeast_sub2$Expression)
+sort(levels(Exp))
+
+yeast_sub2 %>%   
+  ggplot(aes(x = Growth_Rate, y = Expression, group = Growth_Rate, color=Nutrients))+
+  expand_limits(y=c(-3,0,5))+
+  scale_y_discrete(breaks = seq(-2,2,by=0.5))+
+  geom_violin() +
+  facet_wrap(~Nutrients)
+
+```
+
+Expression pattern of cell-cycle related genes changed similarly under the stress of Ammonium, Glucose, and Leucine restriction.
+
+2.Filter genes related to cell cycle and take a look at the relation between growth rate and cell-cycle-related gene expression patterns.
+```{r}
+# filter genes related to metabolism
+yeast_sub2 <- yeast3 %>% 
+  filter(Biological_Process %in% "metabolism") 
+
+Exp <- as.factor(yeast_sub2$Expression)
+sort(levels(Exp))
+
+yeast_sub2 %>%   
+  ggplot(aes(x = Growth_Rate, y = Expression, group = Growth_Rate, color=Nutrients))+
+  expand_limits(y=c(-3,0,5))+
+  scale_y_discrete(breaks = seq(-2,2,by=0.5))+
+  geom_violin() +
+  facet_wrap(~Nutrients)
+```
+
+Expression pattern of metabolism related genes changed similarly under the stress of Ammonium and Leucine restriction. There is similarity of the pattern between Glucose and Sulfate restriction, also between Phosphate and Uracil restriction.
+
+3. Import the growthrate slope data from the paper "Brauer et al 2008: Coordination of Growth Rate, Cell Cycle, Stress Response, and Metabolic Activity in Yeast".
+```{r}
+url2 <- "https://raw.githubusercontent.com/YunMai-SPS/DA607-homework/master/Prj2_TableS1_gene_parameters.csv"
+yeast_parameter <- read.csv(url2, header = T, fill = T)
+yeast_parameter_sub <- select(yeast_parameter, Name, Growth.Rate.Slope)
+yeast_join <- inner_join(yeast3, yeast_parameter_sub, by = "Name")
+```
+
+4. The distribution of the growth rate under the condition when growth rate changed up or down.
+```{r}
+join_sub2 <- yeast_join %>% 
+  filter(Expression < 0, Biological_Process%in%"cell cycle")  
+join_sub3 <- yeast_join %>% 
+  filter(Expression > 0, Biological_Process%in%"cell cycle")  
+
+# the distribution of the growth rate when growth rate decreased
+ggplot(join_sub2,aes(Growth.Rate.Slope, color = Nutrients)) +
+  geom_density()+
+  facet_wrap(~Nutrients)
+# the distribution of the growth rate when growth rate increased
+ggplot(join_sub3,aes(Growth.Rate.Slope, color = Nutrients)) +
+  geom_density()+
+  facet_wrap(~Nutrients) 
+
+```
+
+
+5. View the realtion between the expression of individual genes and growth rate under certain nutrients restriction.
+```{r}
+Stress <- yeast3 %>%
+  filter(Biological_Process == "response to stress") 
+ggplot(Stress, aes(Growth_Rate, Expression, color = Nutrients)) +
+  geom_line() +
+  facet_wrap(~Name)
+```
+Gene CTT1, DDR2, and HSP30 decreased with the growth rate increased under all stress conditions tested.

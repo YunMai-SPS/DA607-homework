@@ -8,3 +8,5 @@ homework3: Work with strings and dates in R; Use regular expressions. Solution f
 project1: Generates a .CSV file for a chess tournament sheet
 
 homework5: Use R to tidy (reshape) a Flight schedule performance dataset and analyze the data based on the reshaped data.
+
+project2: Use R to tidy (reshape) a Flight schedule performance dataset and analyze the data based on the reshaped data. Choose data from week5 discusstion posts.

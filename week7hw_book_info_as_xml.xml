@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<immunology_books>
+  <book id="1">
+    <name>KUBY Immunology</name>
+    <authors> Richard A. Goldsby, Thomas J. Kindt, Barbara A. Osborne</authors>
+    <eidtion>7th</eidtion>
+    <pulisher>W. H. Freeman</pulisher>
+    <Language>English</Language>
+    <yearpublished>2013</yearpublished>
+    <ISBN-13>978-1464119910</ISBN-13>
+    <paperback>670 pages</paperback>
+    <AmazonBestSellersRank>#8</AmazonBestSellersRank> 
+  </book>
+  <book id="2">
+    <name>Cellular and Molecular Immunology</name>
+    <authors> Abul K. Abbas MBBS, Andrew H. H. Lichtman MD PhD, Shiv Pillai MBBS PhD</authors>
+    <eidtion>8th</eidtion>
+    <pulisher>Saunders</pulisher>
+    <Language>English</Language>
+    <yearpublished>2014</yearpublished>
+    <ISBN-13>978-0323222754</ISBN-13>
+    <paperback>544 pages</paperback>
+    <AmazonBestSellersRank>#59</AmazonBestSellersRank> 
+  </book>
+  <book id="2">
+    <name>How the Immune System Works</name>
+    <authors> Lauren M. Sompayrac</authors>
+    <eidtion>5th</eidtion>
+    <pulisher>Wiley-Blackwell</pulisher>
+    <Language>English</Language>
+    <yearpublished>2015</yearpublished>
+    <ISBN-13>978-1118997772</ISBN-13>
+    <paperback>160 pages</paperback>
+    <AmazonBestSellersRank>#17</AmazonBestSellersRank> 
+  </book>
+</immunology_books>

@@ -32,7 +32,7 @@ library(plyr)
 A table containing three books info in HTML format is created. The url is loaded to R. The HTML file is shown after the code.
 
 ```{r}
-html_url <- "https://raw.githubusercontent.com/YunMai-SPS/DA607-homework/master/week7hw_book_info_as_html.html"
+html_url <- "https://raw.githubusercontent.com/YunMai-SPS/DA607-homework/master/DA607week7/week7hw_book_info_as_html.html"
 fetch_html <- getURL(html_url)
 parsed.book.html <- htmlParse(fetch_html)
 print(parsed.book.html)
@@ -60,7 +60,7 @@ kable(book_html[[1]])
 
 An XML file contained the books info is created. It will be shown after the code.
 ```{r}
-xml_url <- "https://raw.githubusercontent.com/YunMai-SPS/DA607-homework/master/week7hw_book_info_as_xml.xml"
+xml_url <- "https://raw.githubusercontent.com/YunMai-SPS/DA607-homework/master/DA607week7/week7hw_book_info_as_xml.xml"
 fetch_xml <- getURL(xml_url)
 parsed.book.xml <- xmlParse(fetch_xml)
 parsed.book.xml
@@ -83,7 +83,7 @@ kable(book_xml)
 
 A JSON file contained the books info is created, as shown after the code.
 ```{r}
-json_url <- "https://raw.githubusercontent.com/YunMai-SPS/DA607-homework/master/week7hw_book_info_as_json.json"
+json_url <- "https://raw.githubusercontent.com/YunMai-SPS/DA607-homework/master/DA607week7/week7hw_book_info_as_json.json"
 fetch_json <- getURL(json_url)
 fetch_json
 ```

@@ -1,0 +1,104 @@
+---
+title: "DA607_homework7_web_scrapping"
+author: "Yun Mai"
+date: "March 18, 2017"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##  Working with XML and JSON in R
+
+Pick three of your favorite books on one of your favorite subjects. At least one of the books should have more than one author. For each book, include the title, authors, and two or three other attributes that you find interesting.
+Take the information that you've selected about these three books, and separately create three files which store the book's information in HTML (using an html table), XML, and JSON formats (e.g. "books.html", "books.xml", and "books.json"). 
+
+To help you better understand the different file structures, I'd prefer that you create each of these files "by hand" unless you're already very comfortable with the file formats.
+Write R code, using your packages of choice, to load the information from each of the three sources into separate R data frames. Are the three data frames identical?
+Your deliverable is the three source files and the R code. If you can, package your assignment solution up into an .Rmd file and publish to rpubs.com. [This will also require finding a way to make your three text files accessible from the web].
+
+**Load packages**
+
+```{r}
+library(RCurl)
+library(XML)
+library(jsonlite)
+library(knitr)
+library(plyr)
+```
+#HTML format#
+
+A table containing three books info in HTML format is created. The url is loaded to R. The HTML file is shown after the code.
+
+```{r}
+html_url <- "https://raw.githubusercontent.com/YunMai-SPS/DA607-homework/master/week7hw_book_info_as_html.html"
+fetch_html <- getURL(html_url)
+parsed.book.html <- htmlParse(fetch_html)
+print(parsed.book.html)
+```
+
+Then read the data from html file as table. The readHTMLTable function maps the html data structure into a list.
+```{r}
+book_html <- readHTMLTable(fetch_html)
+class(book_html)
+```
+View the structure of the list. As shown after the code, it contains only one element which is a data frame.
+```{r}
+str(book_html)
+```
+
+```{r}
+kable(book_html)
+```
+The table is shown after the code.
+```{r}
+kable(book_html[[1]])
+```
+
+#XML format#
+
+An XML file contained the books info is created. It will be shown after the code.
+```{r}
+xml_url <- "https://raw.githubusercontent.com/YunMai-SPS/DA607-homework/master/week7hw_book_info_as_xml.xml"
+fetch_xml <- getURL(xml_url)
+parsed.book.xml <- xmlParse(fetch_xml)
+parsed.book.xml
+```
+
+Then the top-level node of XML file is extracted with
+the xmlRoot() function and transformed into data frame with xmlToDataFrame() function. The xmlToDataFrame function maps the xml data structure into a data frame.
+```{r}
+root <- xmlRoot(parsed.book.xml)
+book_xml <- xmlToDataFrame(root)
+class(book_xml)
+```
+
+View the first few rows of the data frame. 
+```{r}
+kable(book_xml)
+```
+
+#JSON format#
+
+A JSON file contained the books info is created, as shown after the code.
+```{r}
+json_url <- "https://raw.githubusercontent.com/YunMai-SPS/DA607-homework/master/week7hw_book_info_as_json.json"
+fetch_json <- getURL(json_url)
+fetch_json
+```
+
+Parse the JSON data with the fromJSON function. Under the rule of jsonlite, fromJSON function should map JSOn data into a data frame. It turned out to be a list.
+```{r}
+parsed.book.json <- fromJSON(fetch_json)
+class(parsed.book.json)
+```
+View the the structure of the list and it contains one element that is a data frame.
+```{r}
+str(parsed.book.json)
+```
+```{r}
+kable(parsed.book.json[[1]])
+```
+
+**Conclusion: tables written in HTML and JSON are read into R as list objects, while XML table is parsed into R as data.frame object. HTML and JSON table is mapped to a data frame with well defined variables and observations and the data frame is stored in a list. kable function from knitr pacakge can draw a decent table for a data.frame type object but it does not map a list type object to a reader-friendly table, which are shown in the HTML part.**

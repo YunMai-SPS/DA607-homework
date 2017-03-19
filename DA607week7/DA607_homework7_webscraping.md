@@ -31,7 +31,7 @@ HTML format
 A table containing three books info in HTML format is created. The url is loaded to R. The HTML file is shown after the code.
 
 ``` r
-html_url <- "https://raw.githubusercontent.com/YunMai-SPS/DA607-homework/master/week7hw_book_info_as_html.html"
+html_url <- "https://raw.githubusercontent.com/YunMai-SPS/DA607-homework/master/DA607week7/week7hw_book_info_as_html.html"
 fetch_html <- getURL(html_url)
 parsed.book.html <- htmlParse(fetch_html)
 print(parsed.book.html)
@@ -120,7 +120,7 @@ XML format
 An XML file contained the books info is created. It will be shown after the code.
 
 ``` r
-xml_url <- "https://raw.githubusercontent.com/YunMai-SPS/DA607-homework/master/week7hw_book_info_as_xml.xml"
+xml_url <- "https://raw.githubusercontent.com/YunMai-SPS/DA607-homework/master/DA607week7/week7hw_book_info_as_xml.xml"
 fetch_xml <- getURL(xml_url)
 parsed.book.xml <- xmlParse(fetch_xml)
 parsed.book.xml
@@ -195,12 +195,12 @@ JSON format
 A JSON file contained the books info is created, as shown after the code.
 
 ``` r
-json_url <- "https://raw.githubusercontent.com/YunMai-SPS/DA607-homework/master/week7hw_book_info_as_json.json"
+json_url <- "https://raw.githubusercontent.com/YunMai-SPS/DA607-homework/master/DA607week7/week7hw_book_info_as_json.json"
 fetch_json <- getURL(json_url)
 fetch_json
 ```
 
-    ## [1] "{\"Immunology books\" :[\r\n    {\r\n    \"book id\": 1,\r\n    \"name\": \"KUBY Immunology\",\r\n    \"authors\": \"Richard A. Goldsby, Thomas J. Kindt, Barbara A. Osborne\",\r\n    \"eidtion\": \"7th\",\r\n    \"pulisher\": \"W. H. Freeman\",\r\n    \"language\": \"English\",\r\n    \"year_published\": 2013,\r\n    \"ISBN-13\": \"978-1464119910\",\r\n    \"paperback\": \"670 pages\",\r\n    \"Amazon Best Sellers Rank\": \"#8\"\r\n    },\r\n    {\r\n    \"book id\": 2,\r\n    \"name\": \"Cellular and Molecular Immunology\",\r\n    \"authors\": \"Abul K. Abbas MBBS, Andrew H. H. Lichtman MD PhD, Shiv Pillai MBBS PhD\",\r\n    \"eidtion\": \"8th\",\r\n    \"pulisher\": \"Saunders\",\r\n    \"language\": \"English\",\r\n    \"year_published\": 2014,\r\n    \"ISBN-13\": \"978-0323222754\",\r\n    \"paperback\": \"544 pages\",\r\n    \"Amazon Best Sellers Rank\": \"#59\"\r\n    },\r\n    {\r\n    \"book id\": 3,\r\n    \"name\": \"How the Immune System Works\",\r\n    \"authors\": \"Lauren M. Sompayrac\",\r\n    \"eidtion\": \"5th\",\r\n    \"pulisher\": \"Wiley-Blackwell\",\r\n    \"language\": \"English\",\r\n    \"year_published\": 2015,\r\n    \"ISBN-13\": \"978-1118997772\",\r\n    \"paperback\": \"160 pages\",\r\n    \"Amazon Best Sellers Rank\": \"#17\"\r\n    }]\r\n}\r\n\r\n"
+    ## [1] "{\"Immunology books\" :[\n    {\n    \"book id\": 1,\n    \"name\": \"KUBY Immunology\",\n    \"authors\": \"Richard A. Goldsby, Thomas J. Kindt, Barbara A. Osborne\",\n    \"eidtion\": \"7th\",\n    \"pulisher\": \"W. H. Freeman\",\n    \"language\": \"English\",\n    \"year_published\": 2013,\n    \"ISBN-13\": \"978-1464119910\",\n    \"paperback\": \"670 pages\",\n    \"Amazon Best Sellers Rank\": \"#8\"\n    },\n    {\n    \"book id\": 2,\n    \"name\": \"Cellular and Molecular Immunology\",\n    \"authors\": \"Abul K. Abbas MBBS, Andrew H. H. Lichtman MD PhD, Shiv Pillai MBBS PhD\",\n    \"eidtion\": \"8th\",\n    \"pulisher\": \"Saunders\",\n    \"language\": \"English\",\n    \"year_published\": 2014,\n    \"ISBN-13\": \"978-0323222754\",\n    \"paperback\": \"544 pages\",\n    \"Amazon Best Sellers Rank\": \"#59\"\n    },\n    {\n    \"book id\": 3,\n    \"name\": \"How the Immune System Works\",\n    \"authors\": \"Lauren M. Sompayrac\",\n    \"eidtion\": \"5th\",\n    \"pulisher\": \"Wiley-Blackwell\",\n    \"language\": \"English\",\n    \"year_published\": 2015,\n    \"ISBN-13\": \"978-1118997772\",\n    \"paperback\": \"160 pages\",\n    \"Amazon Best Sellers Rank\": \"#17\"\n    }]\n}\n\n"
 
 Parse the JSON data with the fromJSON function. Under the rule of jsonlite, fromJSON function should map JSOn data into a data frame. It turned out to be a list.
 
